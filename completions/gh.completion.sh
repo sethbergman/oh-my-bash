@@ -1,4 +1,8 @@
 #! bash oh-my-bash.module
+#
+# The current version is based on the following upstream version:
+# https://github.com/owenthereal/gh/blob/04a7985fa9a1c1d4d63738f4edb7b07d228bdb12/etc/gh.bash_completion.sh
+#------------------------------------------------------------------------------
 # hub tab-completion script for bash.
 # This script complements the completion script that ships with git.
 
@@ -9,7 +13,7 @@ if _omb_util_function_exists _git; then
         sed 's/__git_list_all_commands/__git_list_all_commands_without_hub/')"
 
   # Wrap the 'list_all_commands' function with extra hub commands
-  __git_list_all_commands() {
+  function __git_list_all_commands {
     cat <<-EOF
 alias
 pull-request
@@ -33,22 +37,22 @@ EOF
   ##########################
 
   # hub alias [-s] [SHELL]
-  _git_alias() {
+  function _git_alias {
     local i c=2 s=-s sh shells="bash zsh sh ksh csh fish"
     while [ $c -lt $cword ]; do
       i="${words[c]}"
       case "$i" in
-        -s)
-          unset s
-          ;;
-        *)
-          for sh in $shells; do
-            if [ "$sh" = "$i" ]; then
-              unset shells
-              break
-            fi
-          done
-          ;;
+      -s)
+        unset s
+        ;;
+      *)
+        for sh in $shells; do
+          if [ "$sh" = "$i" ]; then
+            unset shells
+            break
+          fi
+        done
+        ;;
       esac
       ((c++))
     done
@@ -56,7 +60,7 @@ EOF
   }
 
   # hub browse [-u] [--|[USER/]REPOSITORY] [SUBPAGE]
-  _git_browse() {
+  function _git_browse {
     local i c=2 u=-u repo subpage
     local subpages_="commits issues tree wiki pulls branches stargazers
       contributors network network/ graphs graphs/"
@@ -65,16 +69,16 @@ EOF
     while [ $c -lt $cword ]; do
       i="${words[c]}"
       case "$i" in
-        -u)
-          unset u
-          ;;
-        *)
-          if [ -z "$repo" ]; then
-            repo=$i
-          else
-            subpage=$i
-          fi
-          ;;
+      -u)
+        unset u
+        ;;
+      *)
+        if [ -z "$repo" ]; then
+          repo=$i
+        else
+          subpage=$i
+        fi
+        ;;
       esac
       ((c++))
     done
@@ -82,14 +86,14 @@ EOF
       __gitcomp "$u -- $(__hub_github_repos '\p')"
     elif [ -z "$subpage" ]; then
       case "$cur" in
-        */*)
-          local pfx="${cur%/*}" cur_="${cur#*/}"
-          local subpages_var="subpages_$pfx"
-          __gitcomp "${!subpages_var}" "$pfx/" "$cur_"
-          ;;
-        *)
-          __gitcomp "$u ${subpages_}"
-          ;;
+      */*)
+        local pfx="${cur%/*}" cur_="${cur#*/}"
+        local subpages_var="subpages_$pfx"
+        __gitcomp "${!subpages_var}" "$pfx/" "$cur_"
+        ;;
+      *)
+        __gitcomp "$u ${subpages_}"
+        ;;
       esac
     else
       __gitcomp "$u"
@@ -97,31 +101,31 @@ EOF
   }
 
   # hub compare [-u] [USER[/REPOSITORY]] [[START...]END]
-  _git_compare() {
+  function _git_compare {
     local i c=$((cword - 1)) u=-u user remote owner repo arg_repo rev
     while [ $c -gt 1 ]; do
       i="${words[c]}"
       case "$i" in
-        -u)
-          unset u
-          ;;
-        *)
-          if [ -z "$rev" ]; then
-            # Even though the logic below is able to complete both user/repo
-            # and revision in the right place, when there is only one argument
-            # (other than -u) in the command, that argument will be taken as
-            # revision. For example:
-            # $ hub compare -u upstream
-            # > https://github.com/USER/REPO/compare/upstream
-            if __hub_github_repos '\p' | grep -Eqx "^$i(/[^/]+)?"; then
-              arg_repo=$i
-            else
-              rev=$i
-            fi
-          elif [ -z "$arg_repo" ]; then
+      -u)
+        unset u
+        ;;
+      *)
+        if [ -z "$rev" ]; then
+          # Even though the logic below is able to complete both user/repo
+          # and revision in the right place, when there is only one argument
+          # (other than -u) in the command, that argument will be taken as
+          # revision. For example:
+          # $ hub compare -u upstream
+          # > https://github.com/USER/REPO/compare/upstream
+          if __hub_github_repos '\p' | grep -Eqx "^$i(/[^/]+)?"; then
             arg_repo=$i
+          else
+            rev=$i
           fi
-          ;;
+        elif [ -z "$arg_repo" ]; then
+          arg_repo=$i
+        fi
+        ;;
       esac
       ((c--))
     done
@@ -163,64 +167,64 @@ EOF
 
     local pfx cur_="$cur"
     case "$cur_" in
-      *..*)
-        pfx="${cur_%%..*}..."
-        cur_="${cur_##*..}"
-        __gitcomp_nl "$(__hub_revlist $remote)" "$pfx" "$cur_"
-        ;;
-      *)
-        if [ -z "${arg_repo}${rev}" ]; then
-          __gitcomp "$u $(__hub_github_repos '\o\n\p') $(__hub_revlist $remote)"
-        elif [ -z "$rev" ]; then
-          __gitcomp "$u $(__hub_revlist $remote)"
-        else
-          __gitcomp "$u"
-        fi
-        ;;
+    *..*)
+      pfx="${cur_%%..*}..."
+      cur_="${cur_##*..}"
+      __gitcomp_nl "$(__hub_revlist $remote)" "$pfx" "$cur_"
+      ;;
+    *)
+      if [ -z "${arg_repo}${rev}" ]; then
+        __gitcomp "$u $(__hub_github_repos '\o\n\p') $(__hub_revlist $remote)"
+      elif [ -z "$rev" ]; then
+        __gitcomp "$u $(__hub_revlist $remote)"
+      else
+        __gitcomp "$u"
+      fi
+      ;;
     esac
   }
 
   # hub create [NAME] [-p] [-d DESCRIPTION] [-h HOMEPAGE]
-  _git_create() {
+  function _git_create {
     local i c=2 name repo flags="-p -d -h"
     while [ $c -lt $cword ]; do
       i="${words[c]}"
       case "$i" in
-        -d|-h)
-          ((c++))
-          flags=${flags/$i/}
-          ;;
-        -p)
-          flags=${flags/$i/}
-          ;;
-        *)
-          name=$i
-          ;;
+      -d|-h)
+        ((c++))
+        flags=${flags/$i/}
+        ;;
+      -p)
+        flags=${flags/$i/}
+        ;;
+      *)
+        name=$i
+        ;;
       esac
       ((c++))
     done
     if [ -z "$name" ]; then
-      repo=$(basename "$(pwd)")
+      repo=$(basename "$PWD")
     fi
     case "$prev" in
-      -d|-h)
-        COMPREPLY=()
-        ;;
-      -p|*)
-        __gitcomp "$repo $flags"
-        ;;
+    -d|-h)
+      COMPREPLY=()
+      ;;
+    -p|*)
+      __gitcomp "$repo $flags"
+      ;;
     esac
   }
 
   # hub fork [--no-remote]
-  _git_fork() {
+  function _git_fork {
     local i c=2 remote=yes
     while [ $c -lt $cword ]; do
       i="${words[c]}"
       case "$i" in
-        --no-remote)
-          unset remote
-          ;;
+      --no-remote)
+        unset remote
+        ;;
       esac
       ((c++))
     done
@@ -230,38 +234,38 @@ EOF
   }
 
   # hub pull-request [-f] [-m <MESSAGE>|-F <FILE>|-i <ISSUE>|<ISSUE-URL>] [-b <BASE>] [-h <HEAD>]
-  _git_pull_request() {
+  function _git_pull_request {
     local i c=2 flags="-f -m -F -i -b -h"
     while [ $c -lt $cword ]; do
       i="${words[c]}"
       case "$i" in
-        -m|-F|-i|-b|-h)
-          ((c++))
-          flags=${flags/$i/}
-          ;;
-        -f)
-          flags=${flags/$i/}
-          ;;
+      -m|-F|-i|-b|-h)
+        ((c++))
+        flags=${flags/$i/}
+        ;;
+      -f)
+        flags=${flags/$i/}
+        ;;
       esac
       ((c++))
     done
     case "$prev" in
-      -i)
-        COMPREPLY=()
-        ;;
-      -b|-h)
-        # (Doesn't seem to need this...)
-        # Uncomment the following line when 'owner/repo:[TAB]' misbehaved
-        #_get_comp_words_by_ref -n : cur
-        __gitcomp_nl "$(__hub_heads)"
-        # __ltrim_colon_completions "$cur"
-        ;;
-      -F)
-        COMPREPLY=( "$cur"* )
-        ;;
-      -f|*)
-        __gitcomp "$flags"
-        ;;
+    -i)
+      COMPREPLY=()
+      ;;
+    -b|-h)
+      # (Doesn't seem to need this...)
+      # Uncomment the following line when 'owner/repo:[TAB]' misbehaved
+      #_get_comp_words_by_ref -n : cur
+      __gitcomp_nl "$(__hub_heads)"
+      # __ltrim_colon_completions "$cur"
+      ;;
+    -F)
+      COMPREPLY=( "$cur"* )
+      ;;
+    -f|*)
+      __gitcomp "$flags"
+      ;;
     esac
   }
 
@@ -272,9 +276,9 @@ EOF
   # __hub_github_user [HOST]
   # Return $GITHUB_USER or the default github user defined in hub config
   # HOST - Host to be looked-up in hub config. Default is "github.com"
-  __hub_github_user() {
+  function __hub_github_user {
     if [ -n "$GITHUB_USER" ]; then
-      echo $GITHUB_USER
+      _omb_util_print $GITHUB_USER
       return
     fi
     local line h k v host=${1:-github.com} config=${HUB_CONFIG:-~/.config/gh}
@@ -295,7 +299,7 @@ EOF
         k=${k#* }
         v=${v#* }
         if [ "$h" = "$host" ] && [ "$k" = "user" ]; then
-          echo "$v"
+          _omb_util_print "$v"
           break
         fi
       done < "$config"
@@ -310,7 +314,7 @@ EOF
   #   \o  owner
   #   escaped characters (\n, \t ...etc) work
   # If omitted, prints all github repos in the format of "remote:owner/repo"
-  __hub_github_repos() {
+  function __hub_github_repos {
     local f format=$1
     if [ -z "$(__gitdir)" ]; then
       return
@@ -322,24 +326,24 @@ EOF
       format=${format//\p/\2}
       format=${format//\o/\3}
     fi
-    command git config --get-regexp 'remote\.[^.]*\.url' |
+    _omb_prompt_git config --get-regexp 'remote\.[^.]*\.url' |
     grep -E ' ((https?|git)://|git@)github\.com[:/][^:/]+/[^/]+$' |
     sed -E 's#^remote\.([^.]+)\.url +.+[:/](([^/]+)/[^.]+)(\.git)?$#'"$format"'#'
   }
 
   # __hub_heads
   # List all local "branch", and remote "owner/repo:branch"
-  __hub_heads() {
+  function __hub_heads {
     local i remote repo branch dir=$(__gitdir)
     if [ -d "$dir" ]; then
-      command git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
+      _omb_prompt_git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
         "refs/heads/"
       for i in $(__hub_github_repos); do
         remote=${i%%:*}
         repo=${i#*:}
-        command git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
+        _omb_prompt_git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
           "refs/remotes/${remote}/" | while read branch; do
-          echo "${repo}:${branch#${remote}/}"
+          _omb_util_print "${repo}:${branch#${remote}/}"
         done
       done
     fi
@@ -348,14 +352,14 @@ EOF
   # __hub_revlist [REMOTE]
   # List all tags, and branches under REMOTE, without the "remote/" prefix
   # REMOTE - Remote name to search branches from. Default is "origin"
-  __hub_revlist() {
+  function __hub_revlist {
     local i remote=${1:-origin} dir=$(__gitdir)
     if [ -d "$dir" ]; then
-      command git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
+      _omb_prompt_git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
         "refs/remotes/${remote}/" | while read i; do
-        echo "${i#${remote}/}"
+        _omb_util_print "${i#${remote}/}"
       done
-      command git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
+      _omb_prompt_git --git-dir="$dir" for-each-ref --format='%(refname:short)' \
         "refs/tags/"
     fi
   }
@@ -364,4 +368,3 @@ EOF
   complete -o bashdefault -o default -o nospace -F _git gh 2>/dev/null \
     || complete -o default -o nospace -F _git gh
 fi
-

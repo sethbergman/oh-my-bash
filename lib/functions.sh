@@ -25,7 +25,7 @@ function open_command() {
     cygwin*)  open_cmd='cygstart' ;;
     linux*)   open_cmd='xdg-open' ;;
     msys*)    open_cmd='start ""' ;;
-    *)        echo "Platform $OSTYPE not supported"
+    *)        _omb_util_print "Platform $OSTYPE not supported"
               return 1
               ;;
   esac
@@ -49,10 +49,16 @@ function open_command() {
 #    0 if the alias was found,
 #    1 if it does not exist
 #
-function alias_value() {
-    alias "$1" | sed "s/^$1='\(.*\)'$/\1/"
-    test $(alias "$1")
-}
+if ((_omb_bash_version >= 40000)); then
+  function alias_value() {
+    [[ ${BASH_ALIASES[$1]+set} ]] && _omb_util_print "${BASH_ALIASES[$1]}"
+  }
+else
+  function alias_value() {
+    local value=
+    value=$(alias "$1" 2>/dev/null) && eval "value=${value#*=}" && _omb_util_print "$value"
+  }
+fi
 
 #
 # Try to get the value of an alias,
@@ -66,7 +72,7 @@ function alias_value() {
 #    Always 0
 #
 function try_alias_value() {
-    alias_value "$1" || echo "$1"
+    alias_value "$1" || _omb_util_print "$1"
 }
 
 #

@@ -2,6 +2,10 @@
 
 [![](90210/90210-dark.png)](90210/90210-dark.png)
 
+## `ab+simple`
+
+[![](absimple/absimple-bash.png)](absimple/absimple-bash.png)
+
 ## `agnoster`
 
 [![](agnoster/agnoster-bash-sshot.png)](agnoster/agnoster-bash-sshot.png)
@@ -47,6 +51,10 @@
 
 [![](cooperkid/cooperkid-dark.png)](cooperkid/cooperkid-dark.png)
 
+## `copied-duru`
+
+[![](copied-duru/copied-duru-dark.png)](copied-duru/copied-duru-dark.png)
+
 ## `cupcake`
 
 [![](cupcake/cupcake-dark.png)](cupcake/cupcake-dark.png)
@@ -54,6 +62,10 @@
 ## `demula`
 
 [![](demula/demula-dark.png)](demula/demula-dark.png)
+
+## `developer`
+
+[![](developer/developer_theme_2024_02_09.png)](developer/developer_theme_2024_02_09.png)
 
 ## `dos`
 
@@ -79,6 +91,10 @@
 
 [![](duru/duru-dark.png)](duru/duru-dark.png)
 
+## `edsonarios`
+
+[![](edsonarios/edsonarios-dark.png)](edsonarios/edsonarios-dark.png)
+
 ## `emperor`
 
 [![](emperor/emperor-dark.png)](emperor/emperor-dark.png)
@@ -103,6 +119,10 @@
 
 [![](hawaii50/hawaii50-dark.png)](hawaii50/hawaii50-dark.png)
 
+## `ht`
+
+[![](ht/ht-dark.png)](ht/ht-dark.png)
+
 ## `iterate`
 
 [![](iterate/iterate-dark.png)](iterate/iterate-dark.png)
@@ -110,6 +130,10 @@
 ## `kitsune`
 
 [![](kitsune/kitsune-dark.png)](kitsune/kitsune-dark.png)
+
+## `lambda`
+
+[![](lambda/lambda-dark.png)](lambda/lambda-dark.png)
 
 ## `luan`
 
@@ -127,6 +151,10 @@
 
 [![](minimal/minimal-dark.png)](minimal/minimal-dark.png)
 
+## `minimal-gh`
+
+[![](minimal-gh/minimal-gh-dark.png)](minimal-gh/minimal-gh-dark.png)
+
 ## `modern`
 
 [![](modern/modern-dark.png)](modern/modern-dark.png)
@@ -143,6 +171,18 @@
 
 [![](n0qorg/n0qorg-dark.png)](n0qorg/n0qorg-dark.png)
 
+## `nekolight`
+
+[![](nekolight/nekolight-dark.jpg)](nekolight/nekolight-dark.jpg)
+
+## `nekonight`
+
+[![](nekonight/nekonight-dark.jpg)](nekonight/nekonight-dark.jpg)
+
+## `nekonight_moon`
+
+[![](nekonight_moon/nekonight_moon-dark.jpg)](nekonight_moon/nekonight_moon-dark.jpg)
+
 ## `nwinkler`
 
 [![](nwinkler/nwinkler-dark.png)](nwinkler/nwinkler-dark.png)
@@ -156,9 +196,21 @@
 
 [![](pete/pete-dark.png)](pete/pete-dark.png)
 
+## `powerbash10k`
+
+[![](powerbash10k/powerbash10k-dark.png)](powerbash10k/powerbash10k-dark.png)
+
 ## `powerline`
 
 [![](powerline/powerline-dark.png)](powerline/powerline-dark.png)
+
+## `powerline-icon`
+
+[![](powerline-icon/powerline-icon-dark.png)](powerline-icon/powerline-icon-dark.png)
+
+## `powerline-light`
+
+[![](powerline-light/powerline-light.png)](powerline-light/powerline-light.png)
 
 ## `powerline-multiline`
 
@@ -171,6 +223,10 @@
 ## `powerline-plain`
 
 [![](powerline-plain/powerline-plain-dark.png)](powerline-plain/powerline-plain-dark.png)
+
+## `powerline-wizard`
+
+[![](powerline-wizard/powerline-wizard-dark.png)](powerline-wizard/powerline-wizard-dark.png)
 
 ## `primer`
 

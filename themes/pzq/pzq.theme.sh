@@ -8,6 +8,7 @@
 
 OMB_PROMPT_CONDAENV_FORMAT='(%s)'
 OMB_PROMPT_VIRTUALENV_FORMAT='(%s)'
+OMB_PROMPT_SHOW_PYTHON_VENV=${OMB_PROMPT_SHOW_PYTHON_VENV:=true}
 
 # ----------------------------------------------------------------- COLOR CONF
 D_DEFAULT_COLOR="$_omb_prompt_white"
@@ -38,21 +39,21 @@ case $TERM in
     ;;
 esac
 
-is_vim_shell() {
+function is_vim_shell {
   if [[ ${VIMRUNTIME-} ]]; then
-    echo "${D_INTERMEDIATE_COLOR}on ${D_VIMSHELL_COLOR}vim shell${D_DEFAULT_COLOR} "
+    _omb_util_print "${D_INTERMEDIATE_COLOR}on ${D_VIMSHELL_COLOR}vim shell${D_DEFAULT_COLOR} "
   fi
 }
 
-mitsuhikos_lastcommandfailed() {
+function mitsuhikos_lastcommandfailed {
   local status=$?
   if ((status != 0)); then
-    echo " ${D_DEFAULT_COLOR}C:${D_CMDFAIL_COLOR}$code ${D_DEFAULT_COLOR}"
+    _omb_util_print " ${D_DEFAULT_COLOR}C:${D_CMDFAIL_COLOR}$code ${D_DEFAULT_COLOR}"
   fi
 }
 
 # vcprompt for scm instead of oh-my-bash default
-demula_vcprompt() {
+function demula_vcprompt {
   if [[ ${VCPROMPT_EXECUTABLE-} ]]; then
     local D_VCPROMPT_FORMAT="on ${D_SCM_COLOR}%s${D_INTERMEDIATE_COLOR}:${D_BRANCH_COLOR}%b %r ${D_CHANGES_COLOR}%m%u ${D_DEFAULT_COLOR}"
     $VCPROMPT_EXECUTABLE -f "$D_VCPROMPT_FORMAT"
@@ -60,36 +61,36 @@ demula_vcprompt() {
 }
 
 # checks if the plugin is installed before calling battery_charge
-safe_battery_charge() {
+function safe_battery_charge {
   if _omb_util_function_exists battery_charge; then
     battery_charge
   fi
 }
 
-prompt_git() {
+function prompt_git {
   local branchName=''
 
   # Check if the current directory is in a Git repository.
-  if git rev-parse --is-inside-work-tree &>/dev/null; then
+  if _omb_prompt_git rev-parse --is-inside-work-tree &>/dev/null; then
     # Get the short symbolic ref.
     # If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
     # Otherwise, just give up.
     branchName=$(
-      git symbolic-ref --quiet --short HEAD 2> /dev/null ||
-        git rev-parse --short HEAD 2> /dev/null ||
-        echo '(unknown)');
+      _omb_prompt_git symbolic-ref --quiet --short HEAD 2> /dev/null ||
+        _omb_prompt_git rev-parse --short HEAD 2> /dev/null ||
+        _omb_util_print '(unknown)');
 
-    echo "${D_GIT_DEFAULT_COLOR}on ${D_GIT_BRANCH_COLOR}${branchName} "
+    _omb_util_print "${D_GIT_DEFAULT_COLOR}on ${D_GIT_BRANCH_COLOR}${branchName} "
   else
     return
   fi
 }
 
-limited_pwd() {
+function limited_pwd {
   # Max length of PWD to display
   local MAX_PWD_LENGTH=20
 
-  # Replace $HOME with ~ if possible 
+  # Replace $HOME with ~ if possible
   local RELATIVE_PWD=${PWD/#$HOME/\~}
 
   local offset=$((${#RELATIVE_PWD}-MAX_PWD_LENGTH))
@@ -97,21 +98,21 @@ limited_pwd() {
   if ((offset > 0)); then
     local truncated_symbol='...'
     local TRUNCATED_PWD=${RELATIVE_PWD:offset:MAX_PWD_LENGTH}
-    echo -n "${truncated_symbol}/${TRUNCATED_PWD#*/}"
+    _omb_util_put "${truncated_symbol}/${TRUNCATED_PWD#*/}"
   else
-    echo -n "${RELATIVE_PWD}"
+    _omb_util_put "${RELATIVE_PWD}"
   fi
 }
 
 # -------------------------------------------------------------- PROMPT OUTPUT
-_omb_theme_PROMPT_COMMAND() {
+function _omb_theme_PROMPT_COMMAND {
   local LAST_COMMAND_FAILED=$(mitsuhikos_lastcommandfailed)
   local SAVE_CURSOR='\[\e7'
   local RESTORE_CURSOR='\e8\]'
   local MOVE_CURSOR_RIGHTMOST='\e['${COLUMNS:-9999}'C'
   local MOVE_CURSOR_5_LEFT='\e[5D'
   local THEME_CLOCK_FORMAT="%H:%M:%S %y-%m-%d"
-  # Replace $HOME with ~ if possible 
+  # Replace $HOME with ~ if possible
   local RELATIVE_PWD=${PWD/#$HOME/\~}
 
   local python_venv

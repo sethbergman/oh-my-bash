@@ -4,6 +4,7 @@ source "$OSH/themes/powerline-plain/powerline-plain.base.sh"
 
 USER_INFO_SSH_CHAR=${POWERLINE_USER_INFO_SSH_CHAR:="⌁ "}
 USER_INFO_THEME_PROMPT_COLOR=32
+USER_INFO_THEME_PROMPT_SECONDARY_COLOR="-"
 USER_INFO_THEME_PROMPT_COLOR_SUDO=202
 
 PYTHON_VENV_CHAR=${POWERLINE_PYTHON_VENV_CHAR:="ⓔ "}
@@ -45,5 +46,5 @@ IN_VIM_THEME_PROMPT_TEXT="vim"
 
 POWERLINE_PROMPT=${POWERLINE_PROMPT:="user_info scm python_venv ruby cwd"}
 
-_omb_theme_PROMPT_COMMAND() { __powerline_prompt_command "$@"; }
+function _omb_theme_PROMPT_COMMAND { __powerline_prompt_command "$@"; }
 _omb_util_add_prompt_command _omb_theme_PROMPT_COMMAND

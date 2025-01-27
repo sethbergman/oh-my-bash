@@ -3,20 +3,51 @@
 # Define this here so it can be used by all of the Powerline themes
 THEME_CHECK_SUDO=${THEME_CHECK_SUDO:=false}
 
+function _omb_theme_powerline_hex_to_rgb {
+    local hex_color="$1"
+    local r g b
+
+    r=$((16#${hex_color:1:2}))
+    g=$((16#${hex_color:3:2}))
+    b=$((16#${hex_color:5:2}))
+
+    REPLY="${r};${g};${b}"
+}
+
 function set_color {
+  local fg="" bg=""
+
   if [[ "${1}" != "-" ]]; then
-    fg="38;5;${1}"
+    if [[ ${1} =~ ^[0-9]+$ ]]; then
+      fg="38;5;${1}"  # ANSI 256-color code
+    elif [[ ${1} =~ ^[0-9]{1,3}(\;[0-9]{1,3}){2}$ ]]; then
+      fg="38;2;${1}"  # RGB color code
+    elif [[ ${1} =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+      local REPLY
+      _omb_theme_powerline_hex_to_rgb "${1}"
+      fg="38;2;${REPLY}"  # Hex color code converted to RGB
+    fi
   fi
+
   if [[ "${2}" != "-" ]]; then
-    bg="48;5;${2}"
-    [[ -n "${fg}" ]] && bg=";${bg}"
+    if [[ ${2} =~ ^[0-9]+$ ]]; then
+      bg="48;5;${2}"  # ANSI 256-color code
+    elif [[ ${2} =~ ^[0-9]{1,3}(\;[0-9]{1,3}){2}$ ]]; then
+      bg="48;2;${2}"  # RGB color code
+    elif [[ ${2} =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+      local REPLY
+      _omb_theme_powerline_hex_to_rgb "${2}"
+      bg="48;2;${REPLY}"  # Hex color code converted to RGB
+    fi
   fi
-  echo -e "\[\033[${fg}${bg}m\]"
+
+  echo -e "\[\033[${fg}${fg:+${bg:+;}}${bg}m\]"
 }
 
 function __powerline_user_info_prompt {
   local user_info=""
   local color=${USER_INFO_THEME_PROMPT_COLOR}
+  local secondary_color="${USER_INFO_THEME_PROMPT_SECONDARY_COLOR}"
 
   if [[ "${THEME_CHECK_SUDO}" = true ]]; then
     # check whether sudo is active for no-password executions
@@ -38,7 +69,7 @@ function __powerline_user_info_prompt {
       fi
       ;;
   esac
-  [[ -n "${user_info}" ]] && echo "${user_info}|${color}"
+  [[ -n "${user_info}" ]] && _omb_util_print "${user_info}|${color}|${secondary_color}"
 }
 
 function __powerline_ruby_prompt {
@@ -50,7 +81,7 @@ function __powerline_ruby_prompt {
     ruby_version=$(rbenv_version_prompt)
   fi
 
-  [[ -n "${ruby_version}" ]] && echo "${RUBY_CHAR}${ruby_version}|${RUBY_THEME_PROMPT_COLOR}"
+  [[ -n "${ruby_version}" ]] && _omb_util_print "${RUBY_CHAR}${ruby_version}|${RUBY_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_python_venv_prompt {
@@ -63,7 +94,7 @@ function __powerline_python_venv_prompt {
     python_venv=$(basename "${VIRTUAL_ENV}")
   fi
 
-  [[ -n "${python_venv}" ]] && echo "${PYTHON_VENV_CHAR}${python_venv}|${PYTHON_VENV_THEME_PROMPT_COLOR}"
+  [[ -n "${python_venv}" ]] && _omb_util_print "${PYTHON_VENV_CHAR}${python_venv}|${PYTHON_VENV_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_scm_prompt {
@@ -85,16 +116,16 @@ function __powerline_scm_prompt {
     if [[ "${SCM_GIT_CHAR}" == "${SCM_CHAR}" ]]; then
       scm_prompt+="${SCM_CHAR}${SCM_BRANCH}${SCM_STATE}"
     fi
-    echo "${scm_prompt}${scm}|${color}"
+    _omb_util_print "${scm_prompt}${scm}|${color}"
   fi
 }
 
 function __powerline_cwd_prompt {
-  echo "$(pwd | sed "s|^${HOME}|~|")|${CWD_THEME_PROMPT_COLOR}"
+  _omb_util_print "$(pwd | sed "s|^${HOME}|~|")|${CWD_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_clock_prompt {
-  echo "$(date +"${THEME_CLOCK_FORMAT}")|${CLOCK_THEME_PROMPT_COLOR}"
+  _omb_util_print "$(date +"${THEME_CLOCK_FORMAT}")|${CLOCK_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_battery_prompt {
@@ -112,13 +143,13 @@ function __powerline_battery_prompt {
       color="${BATTERY_STATUS_THEME_PROMPT_GOOD_COLOR}"
     fi
     ac_adapter_connected && battery_status="${BATTERY_AC_CHAR}${battery_status}"
-    echo "${battery_status}%|${color}"
+    _omb_util_print "${battery_status}%|${color}"
   fi
 }
 
 function __powerline_in_vim_prompt {
   if [ -n "$VIMRUNTIME" ]; then
-    echo "${IN_VIM_THEME_PROMPT_TEXT}|${IN_VIM_THEME_PROMPT_COLOR}"
+    _omb_util_print "${IN_VIM_THEME_PROMPT_TEXT}|${IN_VIM_THEME_PROMPT_COLOR}"
   fi
 }
 
@@ -128,17 +159,19 @@ function __powerline_left_segment {
   IFS="${OLD_IFS}"
   local separator_char="${POWERLINE_LEFT_SEPARATOR}"
   local separator=""
+  local text_color=${params[2]:-"-"}
 
   if [[ "${SEGMENTS_AT_LEFT}" -gt 0 ]]; then
     separator="$(set_color ${LAST_SEGMENT_COLOR} ${params[1]})${separator_char}${_omb_prompt_normal}"
   fi
-  LEFT_PROMPT+="${separator}$(set_color - ${params[1]}) ${params[0]} ${_omb_prompt_normal}"
+
+  LEFT_PROMPT+="${separator}$(set_color ${text_color} ${params[1]}) ${params[0]} ${_omb_prompt_normal}"
   LAST_SEGMENT_COLOR=${params[1]}
   (( SEGMENTS_AT_LEFT += 1 ))
 }
 
 function __powerline_last_status_prompt {
-  [[ "$1" -ne 0 ]] && echo "${1}|${LAST_STATUS_THEME_PROMPT_COLOR}"
+  [[ "$1" -ne 0 ]] && _omb_util_print "${1}|${LAST_STATUS_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_prompt_command {
@@ -159,7 +192,11 @@ function __powerline_prompt_command {
     local info="$(__powerline_${segment}_prompt)"
     [[ -n "${info}" ]] && __powerline_left_segment "${info}"
   done
-  [[ "${last_status}" -ne 0 ]] && __powerline_left_segment $(__powerline_last_status_prompt ${last_status})
+
+  ## info status prompt ##
+  local info="$(__powerline_last_status_prompt ${last_status})"
+  [[ -n "${info}" ]] && __powerline_left_segment "${info}"
+
   [[ -n "${LEFT_PROMPT}" ]] && LEFT_PROMPT+="$(set_color ${LAST_SEGMENT_COLOR} -)${separator_char}${_omb_prompt_normal}"
 
   PS1="${LEFT_PROMPT} "

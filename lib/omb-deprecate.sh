@@ -11,7 +11,7 @@ function _omb_deprecate_warning {
   else
     func=
   fi
-  printf '%s\n' "$src$sep$line$func$sep$_omb_term_reset $msg"
+  _omb_util_print "$src$sep$line$func$sep$_omb_term_reset $msg"
 }
 
 function _omb_deprecate_function__notify {
@@ -62,13 +62,13 @@ function _omb_deprecate_declare__init {
     __opts=$__opts:notified
     if ((_omb_version >= __ver)); then
       if [[ $__new ]]; then
-        printf '%s\n' "oh-my-bash: The variable '$__old' is set but has been renamed to '$__new'.  Please use '$__new'."
+        _omb_util_print "oh-my-bash: The variable '$__old' is set but has been renamed to '$__new'.  Please use '$__new'."
       else
-        printf '%s\n' "oh-my-bash: The variable '$__old' is set but has been deprecated.${__msg+ $__msg}"
+        _omb_util_print "oh-my-bash: The variable '$__old' is set but has been deprecated.${__msg+ $__msg}"
       fi >/dev/tty
     fi
     if [[ $__new && ! ${!__new+set} ]]; then
-      printf "$__new" '%s' "${!__old}"
+      printf -v "$__new" '%s' "${!__old}"
     fi
   fi
 }
@@ -104,7 +104,7 @@ if ((_omb_bash_version >= 40300)); then
         _omb_deprecate_warning 1 "The variable '$esc_old' has been deprecated.${__msg+ $__msg}"
       fi >/dev/tty
     fi
-    echo 1
+    _omb_util_print 1
   }
 else
   _omb_deprecate_declare=()
@@ -124,7 +124,7 @@ else
       __notify=1
     fi
 
-    printf "$__old" %s "${!__new-}"
+    printf -v "$__old" %s "${!__new-}"
     if [[ :$__opts: == *:track:* ]]; then
       local __index=${#_omb_deprecate_declare[@]}
       _omb_deprecate_declare[__index]=track:$__old:$__new:$__msg
@@ -152,9 +152,9 @@ else
         local esc_old=$_omb_term_bold_brown$__old$_omb_term_reset
         local esc_new=$_omb_term_bold_navy$__new$_omb_term_reset
         if [[ $__new ]]; then
-          printf '%s\n' "oh-my-bash: The variable '$esc_old' is changed but has been renamed to '$esc_new'.  Please use '$esc_new'."
+          _omb_util_print "oh-my-bash: The variable '$esc_old' is changed but has been renamed to '$esc_new'.  Please use '$esc_new'."
         else
-          printf '%s\n' "oh-my-bash: The variable '$esc_old' is changed but has been deprecated.${__msg+ $__msg}"
+          _omb_util_print "oh-my-bash: The variable '$esc_old' is changed but has been deprecated.${__msg+ $__msg}"
         fi >/dev/tty
       fi
 
@@ -215,7 +215,7 @@ if ((_omb_bash_version >= 40300)); then
         _omb_deprecate_warning 1 "The variable '$esc_old' has been deprecated.${__msg+ $__msg}" >&2
       fi
     fi
-    echo 1
+    _omb_util_print 1
   }
   function _omb_deprecate_const__sync {
     local __index __old __curval __compaction=
@@ -252,17 +252,17 @@ _omb_deprecate_msg_please_use="Please use '$_omb_term_bold_navy%s$_omb_term_rese
 # oh-my-bash.sh -- These functions were originally used to find
 # "fpath" directories, which are not supported by Bash.
 
-is_plugin() {
+function is_plugin {
   local base_dir=$1 name=$2
   [[ -f $base_dir/plugins/$name/$name.plugin.sh || -f $base_dir/plugins/$name/_$name ]]
 }
 
-is_completion() {
+function is_completion {
   local base_dir=$1 name=$2
   [[ -f $base_dir/completions/$name/$name.completion.sh ]]
 }
 
-is_alias() {
+function is_alias {
   local base_dir=$1 name=$2
   [[ -f $base_dir/aliases/$name/$name.aliases.sh ]]
 }
